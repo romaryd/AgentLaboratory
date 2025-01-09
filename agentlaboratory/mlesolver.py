@@ -1,11 +1,11 @@
 import random
 from copy import copy
 from copy import deepcopy
-from common_imports import *
+from agentlaboratory.common_imports import *
 from abc import abstractmethod
 
 
-from tools import *
+from agentlaboratory.tools.tools import *
 from inference import *
 from pathlib import Path
 

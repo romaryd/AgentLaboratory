@@ -2,9 +2,21 @@ import os, re
 import shutil
 import tiktoken
 import subprocess
+from typing import List, Dict, Optional, Union
 
 
-def compile_latex(latex_code, compile=True, output_filename="output.pdf", timeout=30):
+def compile_latex(latex_code: str, compile: bool = True, output_filename: str = "output.pdf", timeout: int = 30) -> str:
+    """Compiles LaTeX code into a PDF document.
+
+    Args:
+        latex_code (str): The LaTeX source code to compile.
+        compile (bool, optional): Whether to actually compile the code. Defaults to True.
+        output_filename (str, optional): Name of the output PDF file. Defaults to "output.pdf".
+        timeout (int, optional): Maximum time in seconds for compilation. Defaults to 30.
+
+    Returns:
+        str: A message indicating compilation success or error details.
+    """
     latex_code = latex_code.replace(
         r"\documentclass{article}",
         "\\documentclass{article}\n\\usepackage{amsmath}\n\\usepackage{amssymb}\n\\usepackage{array}\n\\usepackage{algorithm}\n\\usepackage{algorithmicx}\n\\usepackage{algpseudocode}\n\\usepackage{booktabs}\n\\usepackage{colortbl}\n\\usepackage{color}\n\\usepackage{enumitem}\n\\usepackage{fontawesome5}\n\\usepackage{float}\n\\usepackage{graphicx}\n\\usepackage{hyperref}\n\\usepackage{listings}\n\\usepackage{makecell}\n\\usepackage{multicol}\n\\usepackage{multirow}\n\\usepackage{pgffor}\n\\usepackage{pifont}\n\\usepackage{soul}\n\\usepackage{sidecap}\n\\usepackage{subcaption}\n\\usepackage{titletoc}\n\\usepackage[symbol]{footmisc}\n\\usepackage{url}\n\\usepackage{wrapfig}\n\\usepackage{xcolor}\n\\usepackage{xspace}")
@@ -40,19 +52,36 @@ def compile_latex(latex_code, compile=True, output_filename="output.pdf", timeou
         return f"[CODE EXECUTION ERROR]: Compilation failed: {e.stderr.decode('utf-8')} {e.output.decode('utf-8')}. There was an error in your latex."
 
 
-def count_tokens(messages, model="gpt-4"):
+def count_tokens(messages: List[Dict[str, str]], model: str = "gpt-4") -> int:
+    """Counts the number of tokens in a list of messages for a specific model.
+
+    Args:
+        messages (List[Dict[str, str]]): List of message dictionaries containing 'content' key.
+        model (str, optional): The model to use for token counting. Defaults to "gpt-4".
+
+    Returns:
+        int: Total number of tokens in all messages.
+    """
     enc = tiktoken.encoding_for_model(model)
     num_tokens = sum([len(enc.encode(message["content"])) for message in messages])
     return num_tokens
 
-def remove_figures():
-    """Remove a directory if it exists."""
+def remove_figures() -> None:
+    """Removes all PNG files in the current directory that start with 'Figure_'.
+
+    Searches the current working directory for files matching the pattern 'Figure_*.png'
+    and deletes them.
+    """
     for _file in os.listdir("."):
         if "Figure_" in _file and ".png" in _file:
             os.remove(_file)
 
-def remove_directory(dir_path):
-    """Remove a directory if it exists."""
+def remove_directory(dir_path: str) -> None:
+    """Removes a directory and all its contents if it exists.
+
+    Args:
+        dir_path (str): Path to the directory to be removed.
+    """
     if os.path.exists(dir_path) and os.path.isdir(dir_path):
         try:
             shutil.rmtree(dir_path)
@@ -63,8 +92,14 @@ def remove_directory(dir_path):
         print(f"Directory {dir_path} does not exist or is not a directory.")
 
 
-def save_to_file(location, filename, data):
-    """Utility function to save data as plain text."""
+def save_to_file(location: str, filename: str, data: str) -> None:
+    """Saves text data to a file in the specified location.
+
+    Args:
+        location (str): Directory path where the file should be saved.
+        filename (str): Name of the file to create.
+        data (str): Text content to write to the file.
+    """
     filepath = os.path.join(location, filename)
     try:
         with open(filepath, 'w') as f:
@@ -74,7 +109,17 @@ def save_to_file(location, filename, data):
         print(f"Error saving file {filename}: {e}")
 
 
-def clip_tokens(messages, model="gpt-4", max_tokens=100000):
+def clip_tokens(messages: List[Dict[str, str]], model: str = "gpt-4", max_tokens: int = 100000) -> List[Dict[str, str]]:
+    """Clips the token count of messages to stay within a maximum limit.
+
+    Args:
+        messages (List[Dict[str, str]]): List of message dictionaries to clip.
+        model (str, optional): The model to use for token counting. Defaults to "gpt-4".
+        max_tokens (int, optional): Maximum number of tokens to keep. Defaults to 100000.
+
+    Returns:
+        List[Dict[str, str]]: Clipped messages list that fits within the token limit.
+    """
     enc = tiktoken.encoding_for_model(model)
     total_tokens = sum([len(enc.encode(message["content"])) for message in messages])
 
@@ -112,7 +157,16 @@ def clip_tokens(messages, model="gpt-4", max_tokens=100000):
 
 
 
-def extract_prompt(text, word):
+def extract_prompt(text: str, word: str) -> str:
+    """Extracts code blocks from text that are marked with a specific language identifier.
+
+    Args:
+        text (str): The text to search for code blocks.
+        word (str): The language identifier to look for in code block markers.
+
+    Returns:
+        str: Concatenated string of all matching code blocks, stripped of leading/trailing whitespace.
+    """
     code_block_pattern = rf"```{word}(.*?)```"
     code_blocks = re.findall(code_block_pattern, text, re.DOTALL)
     extracted_code = "\n".join(code_blocks).strip()

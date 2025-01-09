@@ -66,17 +66,17 @@ sudo apt install pdflatex
 
 5. **Now run Agent Laboratory!**
 
-`python ai_lab_repo.py --api-key "API_KEY_HERE" --llm-backend "o1-mini" --research-topic "YOUR RESEARCH IDEA"`
+`python main.py --api-key "API_KEY_HERE" --llm-backend "o1-mini" --research-topic "YOUR RESEARCH IDEA"`
 
 or, if you don't have pdflatex installed
 
-`python ai_lab_repo.py --api-key "API_KEY_HERE" --llm-backend "o1-mini" --research-topic "YOUR RESEARCH IDEA" --compile-latex "false"`
+`python main.py --api-key "API_KEY_HERE" --llm-backend "o1-mini" --research-topic "YOUR RESEARCH IDEA" --compile-latex "false"`
 
 ### Co-Pilot mode
 
 To run Agent Laboratory in copilot mode, simply set the copilot-mode flag to `"true"`
 
-`python ai_lab_repo.py --api-key "API_KEY_HERE" --llm-backend "o1-mini" --research-topic "YOUR RESEARCH IDEA" --copilot-mode "true"`
+`python main.py --api-key "API_KEY_HERE" --llm-backend "o1-mini" --research-topic "YOUR RESEARCH IDEA" --copilot-mode "true"`
 
 -----
 ## Tips for better research outcomes

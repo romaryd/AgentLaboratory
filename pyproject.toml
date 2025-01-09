@@ -1,0 +1,26 @@
+[tool.poetry]
+name = "agentlaboratory"
+version = "0.1.0"
+description = "A framework for running research experiments using AI agents"
+authors = ["Agent Laboratory Team"]
+readme = "README.md"
+packages = [{include = "agentlaboratory"}]
+
+[tool.poetry.scripts]
+laboratory = "agentlaboratory.main:main"
+
+[tool.poetry.dependencies]
+python = "3.11.1"
+tiktoken = "^0.5.1"
+numpy = "^1.24.0"
+pandas = "^2.0.0"
+scikit-learn = "^1.3.0"
+torch = "^2.0.0"
+matplotlib = "^3.7.0"
+datasets = "^2.14.0"
+joblib = "^1.3.0"
+openai = "^1.3.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

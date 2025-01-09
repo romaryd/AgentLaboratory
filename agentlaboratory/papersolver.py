@@ -1,12 +1,12 @@
 import random
 import string
-from utils import *
-from tools import *
+from agentlaboratory.utils import *
+from agentlaboratory.tools.tools import *
 from copy import copy
 from inference import *
 from pathlib import Path
 from copy import deepcopy
-from common_imports import *
+from agentlaboratory.common_imports import *
 from agents import get_score
 from abc import abstractmethod
 

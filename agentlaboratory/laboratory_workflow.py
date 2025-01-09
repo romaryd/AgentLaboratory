@@ -1,14 +1,13 @@
-from agents import *
+import os
+import time
+import pickle
 from copy import copy
+from agents import *
 from common_imports import *
 from mlesolver import MLESolver
-from torch.backends.mkl import verbose
-
-import argparse
-import pickle
+from papersolver import PaperSolver
 
 DEFAULT_LLM_BACKBONE = "o1-mini"
-
 
 class LaboratoryWorkflow:
     def __init__(self, research_topic, openai_api_key, max_steps=100, num_papers_lit_review=5, agent_model_backbone=f"{DEFAULT_LLM_BACKBONE}", notes=list(), human_in_loop_flag=None, compile_pdf=True, mlesolver_max_steps=3, papersolver_max_steps=5):
@@ -95,7 +94,11 @@ class LaboratoryWorkflow:
         os.mkdir(os.path.join("./research_dir", "src"))
         os.mkdir(os.path.join("./research_dir", "tex"))
 
-    def set_model(self, model):
+    def set_model(self, model: str) -> None:
+        """
+        Set the model backbone for all agents
+        @param model: Model identifier string to use for all agents
+        """
         self.set_agent_attr("model", model)
         self.reviewers.model = model
 
@@ -131,10 +134,10 @@ class LaboratoryWorkflow:
         self.professor.reset()
         self.ml_engineer.reset()
 
-    def perform_research(self):
+    def perform_research(self) -> None:
         """
-        Loop through all research phases
-        @return: None
+        Execute the full research workflow by looping through all research phases
+        Records timing statistics and manages phase transitions
         """
         for phase, subtasks in self.phases:
             phase_start_time = time.time()  # Start timing the phase
@@ -196,10 +199,10 @@ class LaboratoryWorkflow:
                 print(f"Subtask '{subtask}' completed in {phase_duration:.2f} seconds.")
                 self.statistics_per_phase[subtask]["time"] = phase_duration
 
-    def report_refinement(self):
+    def report_refinement(self) -> bool:
         """
-        Perform report refinement phase
-        @return: (bool) whether to repeat the phase
+        Execute the report refinement phase where reviewers provide feedback
+        @return: Boolean indicating whether to repeat experiments (True) or complete project (False)
         """
         reviews = self.reviewers.inference(self.phd.plan, self.phd.report)
         print("Reviews:", reviews)
@@ -229,10 +232,10 @@ class LaboratoryWorkflow:
                 return True
             else: raise Exception("Model did not respond")
 
-    def report_writing(self):
+    def report_writing(self) -> bool:
         """
-        Perform report writing phase
-        @return: (bool) whether to repeat the phase
+        Execute the report writing phase using PaperSolver
+        @return: Boolean indicating whether to repeat the phase
         """
         # experiment notes
         report_notes = [_note["note"] for _note in self.ml_engineer.notes if "report writing" in _note["phases"]]
@@ -260,10 +263,10 @@ class LaboratoryWorkflow:
         self.reset_agents()
         return False
 
-    def results_interpretation(self):
+    def results_interpretation(self) -> bool:
         """
-        Perform results interpretation phase
-        @return: (bool) whether to repeat the phase
+        Execute the results interpretation phase through agent dialogue
+        @return: Boolean indicating whether to repeat the phase
         """
         max_tries = self.max_steps
         dialogue = str()
@@ -295,10 +298,10 @@ class LaboratoryWorkflow:
                 if self.verbose: print("#"*40, "\n", "PhD Dialogue:", dialogue, "#"*40, "\n")
         raise Exception("Max tries during phase: Results Interpretation")
 
-    def running_experiments(self):
+    def running_experiments(self) -> bool:
         """
-        Perform running experiments phase
-        @return: (bool) whether to repeat the phase
+        Execute the experiment running phase using MLESolver
+        @return: Boolean indicating whether to repeat the phase
         """
         # experiment notes
         experiment_notes = [_note["note"] for _note in self.ml_engineer.notes if "running experiments" in _note["phases"]]
@@ -327,10 +330,11 @@ class LaboratoryWorkflow:
         self.reset_agents()
         return False
 
-    def data_preparation(self):
+    def data_preparation(self) -> bool:
         """
-        Perform data preparation phase
-        @return: (bool) whether to repeat the phase
+        Execute the data preparation phase through agent dialogue
+        Manages dataset code generation and validation
+        @return: Boolean indicating whether to repeat the phase
         """
         max_tries = self.max_steps
         ml_feedback = str()
@@ -398,10 +402,10 @@ class LaboratoryWorkflow:
                 ml_feedback += f"Huggingface results: {hf_res}\n"
         raise Exception("Max tries during phase: Data Preparation")
 
-    def plan_formulation(self):
+    def plan_formulation(self) -> bool:
         """
-        Perform plan formulation phase
-        @return: (bool) whether to repeat the phase
+        Execute the plan formulation phase through agent dialogue
+        @return: Boolean indicating whether to repeat the phase
         """
         max_tries = self.max_steps
         dialogue = str()
@@ -438,10 +442,11 @@ class LaboratoryWorkflow:
                 if self.verbose: print("#"*40, "\n", "PhD Dialogue:", dialogue, "#"*40, "\n")
         raise Exception("Max tries during phase: Plan Formulation")
 
-    def literature_review(self):
+    def literature_review(self) -> bool:
         """
-        Perform literature review phase
-        @return: (bool) whether to repeat the phase
+        Execute the literature review phase using ArxivSearch
+        Manages paper collection and review generation
+        @return: Boolean indicating whether to repeat the phase
         """
         arx_eng = ArxivSearch()
         max_tries = self.max_steps * 5 # lit review often requires extra steps
@@ -495,12 +500,12 @@ class LaboratoryWorkflow:
             if self.verbose: print(resp, "\n~~~~~~~~~~~")
         raise Exception("Max tries during phase: Literature Review")
 
-    def human_in_loop(self, phase, phase_prod):
+    def human_in_loop(self, phase: str, phase_prod: str) -> bool:
         """
-        Get human feedback for phase output
-        @param phase: (str) current phase
-        @param phase_prod: (str) current phase result
-        @return: (bool) whether to repeat the loop
+        Handle human feedback interaction for a given phase
+        @param phase: Current phase name
+        @param phase_prod: Output/result from the current phase
+        @return: Boolean indicating whether to repeat the phase based on human feedback
         """
         print("\n\n\n\n\n")
         print(f"Presented is the result of the phase [{phase}]: {phase_prod}")
@@ -523,200 +528,3 @@ class LaboratoryWorkflow:
                 return True
             else: print("Invalid response, type Y or N")
         return False
-
-
-
-def parse_arguments():
-    parser = argparse.ArgumentParser(description="AgentLaboratory Research Workflow")
-
-    parser.add_argument(
-        '--copilot-mode',
-        type=str,
-        default="True",
-        help='Enable human interaction mode.'
-    )
-
-    parser.add_argument(
-        '--load-existing',
-        type=str,
-        default="False",
-        help='Do not load existing state; start a new workflow.'
-    )
-
-    parser.add_argument(
-        '--load-existing-path',
-        type=str,
-        help='Path to load existing state; start a new workflow, e.g. state_saves/results_interpretation.pkl'
-    )
-
-    parser.add_argument(
-        '--research-topic',
-        type=str,
-        help='Specify the research topic.'
-    )
-
-    parser.add_argument(
-        '--api-key',
-        type=str,
-        help='Provide the OpenAI API key.'
-    )
-
-    parser.add_argument(
-        '--compile-latex',
-        type=str,
-        default="True",
-        help='Compile latex into pdf during paper writing phase. Disable if you can not install pdflatex.'
-    )
-
-    parser.add_argument(
-        '--llm-backend',
-        type=str,
-        default="o1-mini",
-        help='Backend LLM to use for agents in Agent Laboratory.'
-    )
-
-    parser.add_argument(
-        '--language',
-        type=str,
-        default="English",
-        help='Language to operate Agent Laboratory in.'
-    )
-
-    parser.add_argument(
-        '--num-papers-lit-review',
-        type=str,
-        default="5",
-        help='Total number of papers to summarize in literature review stage'
-    )
-
-    parser.add_argument(
-        '--mlesolver-max-steps',
-        type=str,
-        default="3",
-        help='Total number of mle-solver steps'
-    )
-
-    parser.add_argument(
-        '--papersolver-max-steps',
-        type=str,
-        default="5",
-        help='Total number of paper-solver steps'
-    )
-
-
-    return parser.parse_args()
-
-
-if __name__ == "__main__":
-    args = parse_arguments()
-
-    llm_backend = args.llm_backend
-    human_mode = args.copilot_mode.lower() == "true"
-    compile_pdf = args.compile_latex.lower() == "true"
-    load_existing = args.load_existing.lower() == "true"
-    try:
-        num_papers_lit_review = int(args.num_papers_lit_review.lower())
-    except Exception:
-        raise Exception("args.num_papers_lit_review must be a valid integer!")
-    try:
-        papersolver_max_steps = int(args.papersolver_max_steps.lower())
-    except Exception:
-        raise Exception("args.papersolver_max_steps must be a valid integer!")
-    try:
-        mlesolver_max_steps = int(args.mlesolver_max_steps.lower())
-    except Exception:
-        raise Exception("args.papersolver_max_steps must be a valid integer!")
-
-
-    api_key = os.getenv('OPENAI_API_KEY') or args.api_key or "your-default-api-key"
-    if not api_key:
-        raise ValueError("API key must be provided via --api-key or the OPENAI_API_KEY environment variable.")
-
-    ##########################################################
-    # Research question that the agents are going to explore #
-    ##########################################################
-    if human_mode or args.research_topic is None:
-        research_topic = input("Please name an experiment idea for AgentLaboratory to perform: ")
-    else:
-        research_topic = args.research_topic
-
-    task_notes_LLM = [
-        {"phases": ["plan formulation"],
-         "note": f"You should come up with a plan for TWO experiments."},
-
-        {"phases": ["plan formulation", "data preparation", "running experiments"],
-         "note": "Please use gpt-4o-mini for your experiments."},
-
-        {"phases": ["running experiments"],
-         "note": f'Use the following code to inference gpt-4o-mini: \nfrom openai import OpenAI\nos.environ["OPENAI_API_KEY"] = "{api_key}"\nclient = OpenAI()\ncompletion = client.chat.completions.create(\nmodel="gpt-4o-mini-2024-07-18", messages=messages)\nanswer = completion.choices[0].message.content\n'},
-
-        {"phases": ["running experiments"],
-         "note": f"You have access to only gpt-4o-mini using the OpenAI API, please use the following key {api_key} but do not use too many inferences. Do not use openai.ChatCompletion.create or any openai==0.28 commands. Instead use the provided inference code."},
-
-        {"phases": ["running experiments"],
-         "note": "I would recommend using a small dataset (approximately only 100 data points) to run experiments in order to save time. Do not use much more than this unless you have to or are running the final tests."},
-
-        {"phases": ["data preparation", "running experiments"],
-         "note": "You are running on a MacBook laptop. You can use 'mps' with PyTorch"},
-
-        {"phases": ["data preparation", "running experiments"],
-         "note": "Generate figures with very colorful and artistic design."},
-    ]
-
-    task_notes_LLM.append(
-        {"phases": ["literature review", "plan formulation", "data preparation", "running experiments", "results interpretation", "report writing", "report refinement"],
-        "note": f"You should always write in the following language to converse and to write the report {args.language}"},
-    )
-
-    ####################################################
-    ###  Stages where human input will be requested  ###
-    ####################################################
-    human_in_loop = {
-        "literature review":      human_mode,
-        "plan formulation":       human_mode,
-        "data preparation":       human_mode,
-        "running experiments":    human_mode,
-        "results interpretation": human_mode,
-        "report writing":         human_mode,
-        "report refinement":      human_mode,
-    }
-
-    ###################################################
-    ###  LLM Backend used for the different phases  ###
-    ###################################################
-    agent_models = {
-        "literature review":      llm_backend,
-        "plan formulation":       llm_backend,
-        "data preparation":       llm_backend,
-        "running experiments":    llm_backend,
-        "report writing":         llm_backend,
-        "results interpretation": llm_backend,
-        "paper refinement":       llm_backend,
-    }
-
-    if load_existing:
-        load_path = args.load_existing_path
-        if load_path is None:
-            raise ValueError("Please provide path to load existing state.")
-        with open(load_path, "rb") as f:
-            lab = pickle.load(f)
-    else:
-        lab = LaboratoryWorkflow(
-            research_topic=research_topic,
-            notes=task_notes_LLM,
-            agent_model_backbone=agent_models,
-            human_in_loop_flag=human_in_loop,
-            openai_api_key=api_key,
-            compile_pdf=compile_pdf,
-            num_papers_lit_review=num_papers_lit_review,
-            papersolver_max_steps=papersolver_max_steps,
-            mlesolver_max_steps=mlesolver_max_steps,
-        )
-
-    lab.perform_research()
-
-
-
-
-
-
