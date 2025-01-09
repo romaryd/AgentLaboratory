@@ -1,5 +1,6 @@
 from .base import BaseAgent
-from utils import query_model
+from agentlaboratory.inference import query_model
+
 
 class ProfessorAgent(BaseAgent):
     def __init__(self, model="gpt4omini", notes=None, max_steps=100, openai_api_key=None):
