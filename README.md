@@ -1,5 +1,6 @@
 # Agent Laboratory: Using LLM Agents as Research Assistants
 
+This repository is a fork from Samuel Schmidgall's Agent Laboratory repository.
 
 <p align="center">
   <img src="media/AgentLabLogo.png" alt="Demonstration of the flow of AgentClinic" style="width: 99%;">
