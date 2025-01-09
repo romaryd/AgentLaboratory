@@ -5,10 +5,11 @@ from agentlaboratory.common_imports import *
 from abc import abstractmethod
 
 
-from agentlaboratory.tools.tools import *
+from agentlaboratory.tools import *
 from inference import *
 from pathlib import Path
 
+from agentlaboratory.inference import query_model
 
 from contextlib import contextmanager
 import sys, os

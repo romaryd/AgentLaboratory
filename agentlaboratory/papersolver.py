@@ -1,7 +1,7 @@
 import random
 import string
 from agentlaboratory.utils import *
-from agentlaboratory.tools.tools import *
+from agentlaboratory.tools import *
 from copy import copy
 from inference import *
 from pathlib import Path
@@ -9,6 +9,7 @@ from copy import deepcopy
 from agentlaboratory.common_imports import *
 from agents import get_score
 from abc import abstractmethod
+from agentlaboratory.inference import query_model
 
 from contextlib import contextmanager
 import sys, os
