@@ -38,45 +38,27 @@ This repository is a fork from Samuel Schmidgall's Agent Laboratory repository.
 
 1. **Clone the GitHub Repository**: Begin by cloning the repository using the command:
 ```bash
-git clone git@github.com:SamuelSchmidgall/AgentLaboratory.git
+git clone git@github.com:romaryd/AgentLaboratory.git
 ```
 
-2. **Set up and Activate Python Environment**
+2. **Set up laboratory**
 ```bash
-python -m venv venv_agent_lab
-```
-- Now activate this environment:
-```bash
-source venv_agent_lab/bin/activate
+poetry install
 ```
 
-3. **Install required libraries**
-```bash
-pip install -r requirements.txt
-```
+3. **Now run Agent Laboratory!**
 
-4. **Install pdflatex [OPTIONAL]**
-```bash
-sudo apt install pdflatex
-```
-- This enables latex source to be compiled by the agents.
-- **[IMPORTANT]** If this step cannot be run due to not having sudo access, pdf compiling can be turned off via running Agent Laboratory via setting the `--compile-latex` flag to false: `--compile-latex "false"`
-
-
-
-5. **Now run Agent Laboratory!**
-
-`python main.py --api-key "API_KEY_HERE" --llm-backend "o1-mini" --research-topic "YOUR RESEARCH IDEA"`
+`laboratory --api-key "your-api-key" --llm-backend "o1-mini" --research-topic "YOUR RESEARCH IDEA"`
 
 or, if you don't have pdflatex installed
 
-`python main.py --api-key "API_KEY_HERE" --llm-backend "o1-mini" --research-topic "YOUR RESEARCH IDEA" --compile-latex "false"`
+`laboratory --api-key "API_KEY_HERE" --llm-backend "o1-mini" --research-topic "YOUR RESEARCH IDEA" --compile-latex "false"`
 
 ### Co-Pilot mode
 
 To run Agent Laboratory in copilot mode, simply set the copilot-mode flag to `"true"`
 
-`python main.py --api-key "API_KEY_HERE" --llm-backend "o1-mini" --research-topic "YOUR RESEARCH IDEA" --copilot-mode "true"`
+`laboratory --api-key "API_KEY_HERE" --llm-backend "o1-mini" --research-topic "YOUR RESEARCH IDEA" --copilot-mode "true"`
 
 -----
 ## Tips for better research outcomes
@@ -88,7 +70,7 @@ To run Agent Laboratory in copilot mode, simply set the copilot-mode flag to `"t
 
 This is also your opportunity to let the agent know **what compute resources it has access to**, e.g. GPUs (how many, what type of GPU, how many GBs), CPUs (how many cores, what type of CPUs), storage limitations, and hardware specs.
 
-In order to add notes, you must modify the task_notes_LLM structure inside of `ai_lab_repo.py`. Provided below is an example set of notes used for some of our experiments. 
+In order to add notes, you must modify the task_notes_LLM structure inside of `main.py`. Provided below is an example set of notes used for some of our experiments. 
 
 
 ```
@@ -130,9 +112,9 @@ When resources are limited, **optimize by fine-tuning smaller models** on your s
 
 #### [Tip #3] ✅ You can load previous saves from checkpoints ✅
 
-**If you lose progress, internet connection, or if a subtask fails, you can always load from a previous state.** All of your progress is saved by default in the `state_saves` variable, which stores each individual checkpoint. Just pass the following arguments when running `ai_lab_repo.py`
+**If you lose progress, internet connection, or if a subtask fails, you can always load from a previous state.** All of your progress is saved by default in the `state_saves` variable, which stores each individual checkpoint. Just pass the following arguments when running `laboratory`
 
-`python ai_lab_repo.py --api-key "API_KEY_HERE" --research-topic "YOUR RESEARCH IDEA" --llm-backend "o1-mini" --load-existing True --load-existing-path "save_states/LOAD_PATH"`
+`laboratory --api-key "API_KEY_HERE" --research-topic "YOUR RESEARCH IDEA" --llm-backend "o1-mini" --load-existing True --load-existing-path "save_states/LOAD_PATH"`
 
 -----
 
@@ -144,7 +126,7 @@ If you are running Agent Laboratory in a language other than English, no problem
 
 For example, if you are running in Chinese:
 
-`python ai_lab_repo.py --api-key "API_KEY_HERE" --research-topic "YOUR RESEARCH IDEA (in your language)" --llm-backend "o1-mini" --language "中文"`
+`laboratory --api-key "API_KEY_HERE" --research-topic "YOUR RESEARCH IDEA (in your language)" --llm-backend "o1-mini" --language "中文"`
 
 ----
 
