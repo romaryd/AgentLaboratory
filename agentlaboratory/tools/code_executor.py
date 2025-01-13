@@ -1,13 +1,13 @@
-
 import io
 import sys
 import traceback
 import concurrent.futures
 import matplotlib
 
+
 def execute_code(code_str, timeout=60, MAX_LEN=1000):
     # prevent plotting errors
-    matplotlib.use('Agg')  # Use the non-interactive Agg backend
+    matplotlib.use("Agg")  # Use the non-interactive Agg backend
     import matplotlib.pyplot as plt
 
     # Preventing execution of certain resource-intensive datasets

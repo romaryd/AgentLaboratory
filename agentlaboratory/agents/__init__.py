@@ -5,9 +5,9 @@ from .mlengineer import MLEngineerAgent
 from .base import BaseAgent
 
 __all__ = [
-    'BaseAgent',
-    'ProfessorAgent',
-    'PostdocAgent',
-    'PhDStudentAgent',
-    'MLEngineerAgent'
+    "BaseAgent",
+    "ProfessorAgent",
+    "PostdocAgent",
+    "PhDStudentAgent",
+    "MLEngineerAgent",
 ]

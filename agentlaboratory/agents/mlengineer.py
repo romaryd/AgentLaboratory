@@ -1,7 +1,10 @@
 from .base import BaseAgent
 
+
 class MLEngineerAgent(BaseAgent):
-    def __init__(self, model="gpt4omini", notes=None, max_steps=100, openai_api_key=None):
+    def __init__(
+        self, model="gpt4omini", notes=None, max_steps=100, openai_api_key=None
+    ):
         super().__init__(model, notes, max_steps, openai_api_key)
         self.phases = [
             "data preparation",
@@ -17,13 +20,14 @@ class MLEngineerAgent(BaseAgent):
                 f"Previous Results: {self.prev_exp_results}\n"
                 f"Previous Interpretation of results: {self.prev_interpretation}\n"
                 f"Previous Report: {self.prev_report}\n"
-                f"{self.reviewer_response}\n\n\n"
+                f"{self.reviewer_response}\n\n\n",
             )
         if phase == "data preparation":
             return (
                 sr_str,
                 f"Current Literature Review: {self.lit_review_sum}\nPlan: {self.plan}",
-                f"Current Plan: {self.plan}")
+                f"Current Plan: {self.plan}",
+            )
         return ""
 
     def example_command(self, phase):
@@ -41,7 +45,8 @@ class MLEngineerAgent(BaseAgent):
                 "You also have access to HuggingFace datasets. You can search the datasets repository using the following command: ```SEARCH_HF\nsearch query here\n``` where search query here is the query used to search HuggingFace datasets, and SEARCH_HF is the word SEARCH_HF. This will return a list of HuggingFace dataset descriptions which can be loaded into Python using the datasets library. Your code MUST use an external HuggingFace directory.\n"
                 "You MUST use a HuggingFace dataset in your code. DO NOT CREATE A MAIN FUNCTION. Try to make the code very simple.\n"
                 "You can only use a SINGLE command per inference turn. Do not use more than one command per inference. If you use multiple commands, then only one of them will be executed, NOT BOTH.\n"
-                "When performing a command, make sure to include the three ticks (```) at the top and bottom ```COMMAND\ntext\n``` where COMMAND is the specific command you want to run (e.g. python, DIALOGUE, SEARCH_HF).\n")
+                "When performing a command, make sure to include the three ticks (```) at the top and bottom ```COMMAND\ntext\n``` where COMMAND is the specific command you want to run (e.g. python, DIALOGUE, SEARCH_HF).\n"
+            )
         return ()
 
     def phase_prompt(self, phase):

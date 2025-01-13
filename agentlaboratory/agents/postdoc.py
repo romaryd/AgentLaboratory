@@ -1,7 +1,10 @@
 from .base import BaseAgent
 
+
 class PostdocAgent(BaseAgent):
-    def __init__(self, model="gpt4omini", notes=None, max_steps=100, openai_api_key=None):
+    def __init__(
+        self, model="gpt4omini", notes=None, max_steps=100, openai_api_key=None
+    ):
         super().__init__(model, notes, max_steps, openai_api_key)
         self.phases = ["plan formulation", "results interpretation"]
 
@@ -14,7 +17,7 @@ class PostdocAgent(BaseAgent):
                 f"Previous Results: {self.prev_exp_results}\n"
                 f"Previous Interpretation of results: {self.prev_interpretation}\n"
                 f"Previous Report: {self.prev_report}\n"
-                f"{self.reviewer_response}\n\n\n"
+                f"{self.reviewer_response}\n\n\n",
             )
         if phase == "plan formulation":
             return (
@@ -28,7 +31,7 @@ class PostdocAgent(BaseAgent):
                 f"Current Plan: {self.plan}\n"
                 f"Current Dataset code: {self.dataset_code}\n"
                 f"Current Experiment code: {self.results_code}\n"
-                f"Current Results: {self.exp_results}"
+                f"Current Results: {self.exp_results}",
             )
         return
 

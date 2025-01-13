@@ -41,7 +41,7 @@ import torch.optim as optim
 import torch.nn.functional as F
 from torch.utils.data import DataLoader, Dataset, random_split
 import tensorflow as tf
-#import keras
+# import keras
 
 # NLP Libraries
 import tiktoken
@@ -51,6 +51,7 @@ from nltk.corpus import stopwords
 from nltk.stem import PorterStemmer, WordNetLemmatizer
 import spacy
 import sacremoses
+
 # Diffusers for image generation and stable diffusion
 import diffusers
 from diffusers import StableDiffusionPipeline, DPMSolverMultistepScheduler
@@ -66,7 +67,14 @@ from huggingface_hub import HfApi, notebook_login
 # Scikit-learn for machine learning
 import sklearn
 from sklearn.model_selection import train_test_split, GridSearchCV, RandomizedSearchCV
-from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, classification_report, confusion_matrix
+from sklearn.metrics import (
+    accuracy_score,
+    precision_score,
+    recall_score,
+    f1_score,
+    classification_report,
+    confusion_matrix,
+)
 from sklearn.preprocessing import StandardScaler, MinMaxScaler, LabelEncoder
 from sklearn.decomposition import PCA
 from sklearn.cluster import KMeans

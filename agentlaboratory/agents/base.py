@@ -1,9 +1,15 @@
 from agentlaboratory.inference import query_model
+from agentlaboratory.utils import extract_prompt
+
 
 class BaseAgent:
-    def __init__(self, model="gpt-4o-mini", notes=None, max_steps=100, openai_api_key=None):
-        if notes is None: self.notes = []
-        else: self.notes = notes
+    def __init__(
+        self, model="gpt-4o-mini", notes=None, max_steps=100, openai_api_key=None
+    ):
+        if notes is None:
+            self.notes = []
+        else:
+            self.notes = notes
         self.max_steps = max_steps
         self.model = model
         self.phases = []
@@ -39,27 +45,47 @@ class BaseAgent:
         context = self.context(phase)
         history_str = "\n".join([_[1] for _ in self.history])
         phase_notes = [_note for _note in self.notes if phase in _note["phases"]]
-        notes_str = f"Notes for the task objective: {phase_notes}\n" if len(phase_notes) > 0 else ""
+        notes_str = (
+            f"Notes for the task objective: {phase_notes}\n"
+            if len(phase_notes) > 0
+            else ""
+        )
         complete_str = str()
-        if step/(self.max_steps-1) > 0.7: complete_str = "You must finish this task and submit as soon as possible!"
+        if step / (self.max_steps - 1) > 0.7:
+            complete_str = "You must finish this task and submit as soon as possible!"
         prompt = (
-            f"""{context}\n{'~' * 10}\nHistory: {history_str}\n{'~' * 10}\n"""
+            f"""{context}\n{"~" * 10}\nHistory: {history_str}\n{"~" * 10}\n"""
             f"Current Step #{step}, Phase: {phase}\n{complete_str}\n"
             f"[Objective] Your goal is to perform research on the following topic: {research_topic}\n"
-            f"Feedback: {feedback}\nNotes: {notes_str}\nYour previous command was: {self.prev_comm}. Make sure your new output is very different.\nPlease produce a single command below:\n")
-        model_resp = query_model(model_str=self.model, system_prompt=sys_prompt, prompt=prompt, temp=temp, openai_api_key=self.openai_api_key)
-        print("^"*50, phase, "^"*50)
+            f"Feedback: {feedback}\nNotes: {notes_str}\nYour previous command was: {self.prev_comm}. Make sure your new output is very different.\nPlease produce a single command below:\n"
+        )
+        model_resp = query_model(
+            model_str=self.model,
+            system_prompt=sys_prompt,
+            prompt=prompt,
+            temp=temp,
+            openai_api_key=self.openai_api_key,
+        )
+        print("^" * 50, phase, "^" * 50)
         model_resp = self.clean_text(model_resp)
         self.prev_comm = model_resp
         steps_exp = None
         if feedback is not None and "```EXPIRATION" in feedback:
             steps_exp = int(feedback.split("\n")[0].replace("```EXPIRATION ", ""))
             feedback = extract_prompt(feedback, "EXPIRATION")
-        self.history.append((steps_exp, f"Step #{step}, Phase: {phase}, Feedback: {feedback}, Your response: {model_resp}"))
+        self.history.append(
+            (
+                steps_exp,
+                f"Step #{step}, Phase: {phase}, Feedback: {feedback}, Your response: {model_resp}",
+            )
+        )
         # remove histories that have expiration dates
         for _i in reversed(range(len(self.history))):
             if self.history[_i][0] is not None:
-                self.history[_i] = self.history[_i] = self.history[_i][0] - 1, self.history[_i][1]
+                self.history[_i] = self.history[_i] = (
+                    self.history[_i][0] - 1,
+                    self.history[_i][1],
+                )
                 if self.history[_i][0] < 0:
                     self.history.pop(_i)
         if len(self.history) >= self.max_hist_len:

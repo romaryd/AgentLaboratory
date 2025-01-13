@@ -3,7 +3,6 @@ from agentlaboratory.agents.base import BaseAgent
 
 
 class TestBaseAgent(unittest.TestCase):
-
     def setUp(self):
         self.agent = BaseAgent()
 
@@ -70,5 +69,6 @@ class TestBaseAgent(unittest.TestCase):
         self.assertEqual(self.agent.history, [])
         self.assertEqual(self.agent.prev_comm, "")
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     unittest.main()
