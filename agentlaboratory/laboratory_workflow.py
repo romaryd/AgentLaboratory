@@ -4,8 +4,8 @@ import pickle
 from copy import copy
 from agentlaboratory.agents import *
 from agentlaboratory.common_imports import *
-from mlesolver import MLESolver
-from papersolver import PaperSolver
+from agentlaboratory.tools.mlesolver import MLESolver
+from agentlaboratory.tools.papersolver import PaperSolver
 
 DEFAULT_LLM_BACKBONE = "o1-mini"
 
@@ -357,7 +357,7 @@ class LaboratoryWorkflow:
             else ""
         )
         # instantiate mle-solver
-        from papersolver import PaperSolver
+        from agentlaboratory.tools.papersolver import PaperSolver
 
         self.reference_papers = []
         solver = PaperSolver(
