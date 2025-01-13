@@ -3,9 +3,34 @@ from agentlaboratory.utils import extract_prompt
 
 
 class BaseAgent:
+    """Base class for implementing research agents.
+
+    This class provides the foundation for creating research agents that can perform
+    various research tasks through multiple phases. It handles model interactions,
+    maintains conversation history, and manages research state.
+
+    Attributes:
+        notes (list): List of notes related to the research task.
+        max_steps (int): Maximum number of steps allowed in the research process.
+        model (str): Name of the language model to use.
+        phases (list): List of research phases.
+        plan (str): Research plan.
+        report (str): Final research report.
+        history (list): Conversation history.
+        openai_api_key (str): API key for OpenAI services.
+    """
+
     def __init__(
         self, model="gpt-4o-mini", notes=None, max_steps=100, openai_api_key=None
     ):
+        """Initialize the BaseAgent.
+
+        Args:
+            model (str, optional): Model identifier. Defaults to "gpt-4o-mini".
+            notes (list, optional): Initial notes for the agent. Defaults to None.
+            max_steps (int, optional): Maximum steps for research. Defaults to 100.
+            openai_api_key (str, optional): OpenAI API key. Defaults to None.
+        """
         if notes is None:
             self.notes = []
         else:
@@ -33,14 +58,39 @@ class BaseAgent:
         self.max_hist_len = 15
 
     def set_model_backbone(self, model):
+        """Set the language model to be used by the agent.
+
+        Args:
+            model (str): Identifier of the language model.
+        """
         self.model = model
 
     @staticmethod
     def clean_text(text):
+        """Clean the text by removing unnecessary newlines in code blocks.
+
+        Args:
+            text (str): Text to be cleaned.
+
+        Returns:
+            str: Cleaned text.
+        """
         text = text.replace("```\n", "```")
         return text
 
     def inference(self, research_topic, phase, step, feedback="", temp=None):
+        """Perform inference using the language model.
+
+        Args:
+            research_topic (str): The research topic to investigate.
+            phase (str): Current phase of research.
+            step (int): Current step number.
+            feedback (str, optional): Feedback from previous step. Defaults to "".
+            temp (float, optional): Temperature for model sampling. Defaults to None.
+
+        Returns:
+            str: Model's response.
+        """
         sys_prompt = f"""You are {self.role_description()} \nTask instructions: {self.phase_prompt(phase)}\n{self.command_descriptions(phase)}"""
         context = self.context(phase)
         history_str = "\n".join([_[1] for _ in self.history])
@@ -93,20 +143,58 @@ class BaseAgent:
         return model_resp
 
     def reset(self):
+        """Reset the agent's history and previous command."""
         self.history.clear()
         self.prev_comm = ""
 
     def context(self, phase):
+        """Get context information for the current phase.
+
+        Args:
+            phase (str): Current phase of research.
+
+        Raises:
+            NotImplementedError: Must be implemented by subclasses.
+        """
         raise NotImplementedError("Subclasses should implement this method.")
 
     def phase_prompt(self, phase):
+        """Get the prompt template for the current phase.
+
+        Args:
+            phase (str): Current phase of research.
+
+        Raises:
+            NotImplementedError: Must be implemented by subclasses.
+        """
         raise NotImplementedError("Subclasses should implement this method.")
 
     def role_description(self):
+        """Get the agent's role description.
+
+        Raises:
+            NotImplementedError: Must be implemented by subclasses.
+        """
         raise NotImplementedError("Subclasses should implement this method.")
 
     def command_descriptions(self, phase):
+        """Get available command descriptions for the current phase.
+
+        Args:
+            phase (str): Current phase of research.
+
+        Raises:
+            NotImplementedError: Must be implemented by subclasses.
+        """
         raise NotImplementedError("Subclasses should implement this method.")
 
     def example_command(self, phase):
+        """Get example commands for the current phase.
+
+        Args:
+            phase (str): Current phase of research.
+
+        Raises:
+            NotImplementedError: Must be implemented by subclasses.
+        """
         raise NotImplementedError("Subclasses should implement this method.")
